@@ -1,4 +1,4 @@
-property version : "1.0"
+property version : "1.1"
 
 property LVL_OFF : {name:"OFF", value:0}
 property LVL_DEBUG : {name:"DEBUG", value:10}
@@ -81,7 +81,7 @@ on get_level_name(lvl)
 			return name of globallevel
 		end if
 	end repeat
-	
+
 	-- Level was not found
 	try
 		error name of lvl & " is not a known logging level." number -1002
@@ -103,12 +103,12 @@ end get_level_name
  *)
 script _HelperLib
 	property class : "HelperLibrary"
-	
-	
+
+
 	on get_date(dateformat)
 		return (do shell script " date +" & quoted form of dateformat)
 	end get_date
-	
+
 	on search_and_replace(myString, oldText, newText)
 		set AppleScript's text item delimiters to oldText
 		set myList to text items of myString
@@ -117,40 +117,40 @@ script _HelperLib
 		set AppleScript's text item delimiters to ""
 		return myString
 	end search_and_replace
-	
+
 	on exists_file(fp)
 		tell application "System Events"
 			return exists disk item fp
 		end tell
 	end exists_file
-	
+
 	on write_to_file(filepath, txt)
 		write (txt & linefeed) to POSIX file (POSIX path of filepath) starting at eof
 	end write_to_file
-	
+
 	on create_file(filepath)
 		ensure_directory_exists(parent_folder_of(filepath))
 		open for access file filepath with write permission
 		close access file filepath
 	end create_file
-	
+
 	on explode(theText, theDelim)
 		set AppleScript's text item delimiters to theDelim
 		set theList to text items of theText
 		set AppleScript's text item delimiters to ""
 		return theList
 	end explode
-	
+
 	on implode(theList, theDelim)
 		set AppleScript's text item delimiters to theDelim
 		set theText to theList as text
 		set AppleScript's text item delimiters to ""
 		return theText
 	end implode
-	
+
 	on ensure_directory_exists(theDirectory)
 		set targetFolder to theDirectory
-		
+
 		set folderList to items 1 thru -2 of explode(theDirectory, ":") --The trailing colon leaves an empty string at the end of the list
 		set fullPath to item 1 of folderList & ":"
 		repeat with i from 2 to (count folderList) --There is no directory to make a new folder in for the first item, so it can be ignored
@@ -163,15 +163,15 @@ script _HelperLib
 		end repeat
 		return targetFolder
 	end ensure_directory_exists
-	
+
 	on parent_folder_of(theAlias)
 		if class of theAlias is alias then
 			set theAlias to theAlias as string
 		end if
-		
+
 		--Get the character that separates each folder
 		set {colon, backslash, slash} to {":", "/", "\\"}
-		
+
 		if theAlias contains colon then
 			set separator to colon
 		else if theAlias contains backslash then
@@ -181,28 +181,28 @@ script _HelperLib
 		else
 			set separator to colon
 		end if
-		
+
 		--Remove trailing separator from folders or else the same folder is returned
 		if theAlias ends with separator then
 			set theAlias to items 1 thru -2 of theAlias as string
 		end if
-		
+
 		set parts to explode(theAlias, separator)
 		if ((count parts) > 1) then
 			return implode(items 1 thru -2 of parts, separator) & separator
 		end if
-		
+
 		return theAlias
 	end parent_folder_of
-	
+
 	on filename_of(theFile)
 		if class of theFile is alias then
 			set theFile to theFile as string
 		end if
-		
+
 		--Get the character that separates each folder
 		set {colon, backslash, slash} to {":", "/", "\\"}
-		
+
 		if theFile contains colon then
 			set separator to colon
 		else if theFile contains backslash then
@@ -212,17 +212,17 @@ script _HelperLib
 		else
 			set separator to colon
 		end if
-		
+
 		--Remove trailing separator from folders or else the same folder is returned
 		if theFile ends with separator then
 			set theFile to items 1 thru -2 of theFile as string
 		end if
-		
+
 		set parts to explode(theFile, separator)
 		if ((count parts) > 1) then
 			return item -1 of parts
 		end if
-		
+
 		return theFile
 	end filename_of
 end script
@@ -293,17 +293,17 @@ end script
  *)
 script ASLogger
 	property class : "ASLogger"
-	
+
 	-- Private attributes
 	property _folderpath : missing value
 	property _filename : missing value
-	
+
 	-- Public attributes
 	property dateformat : "%Y-%m-%d %H:%M:%S"
 	property msgformat : "%datetime% [%lvlname%] %msg%"
 	property level : LVL_INFO
-	
-	
+
+
 	(**
 	 * Log a DEBUG level message.
 	 *
@@ -315,7 +315,7 @@ script ASLogger
 	on log_debug(msg)
 		_log_msg("DEBUG", msg)
 	end log_debug
-	
+
 	(**
 	 * Log an INFO level message.
 	 *
@@ -324,7 +324,7 @@ script ASLogger
 	on log_info(msg)
 		_log_msg("INFO", msg)
 	end log_info
-	
+
 	(**
 	 * Log a WARN level message.
 	 *
@@ -333,7 +333,7 @@ script ASLogger
 	on log_warn(msg)
 		_log_msg("WARN", msg)
 	end log_warn
-	
+
 	(**
 	 * Log an ERROR level message.
 	 *
@@ -342,7 +342,7 @@ script ASLogger
 	on log_error(msg)
 		_log_msg("ERROR", msg)
 	end log_error
-	
+
 	(**
 	 * Log a custom level message
 	 *
@@ -352,8 +352,8 @@ script ASLogger
 	on log_other(lvlname, msg)
 		_log_msg(lvlname, msg)
 	end log_other
-	
-	
+
+
 	(**
 	 * Create a log entry in the log file.
 	 *
@@ -381,7 +381,7 @@ script ASLogger
 			log errmsg & "number " & errnum
 		end try
 	end _log_msg
-	
+
 	(**
 	 * Format the string that will be written to the file.
 	 *
@@ -400,7 +400,7 @@ script ASLogger
 		set formattedMsg to _HelperLib's search_and_replace(formattedMsg, "%datetime%", _HelperLib's get_date(my dateformat))
 		return formattedMsg
 	end _format_msg
-	
+
 	(**
 	 * Determine if a message should be logged.
 	 *
@@ -414,7 +414,7 @@ script ASLogger
 		set msglevel to get_level(lvlname)
 		return value of msglevel ≥ value of my level
 	end _should_log
-	
+
 	(**
 	 * Concat the folderpath and filename to get a full path to the log.
 	 *
@@ -446,11 +446,11 @@ end script
 script RotatingLogger
 	property class : "RotatingLogger"
 	property parent : ASLogger
-	
+
 	property maxfiles : 1000 -- (**The number of files to keep at a time.*)
 	property maxbytes : 0 --    (**The size at which to rotate the log.*)
-	
-	
+
+
 	(**
 	 * Same as ASLogger's `_log_msg()`, but checks if log should be rotated first.
 	 *
@@ -466,7 +466,7 @@ script RotatingLogger
 		end if
 		my parent's _log_msg(lvlname, msg)
 	end _log_msg
-	
+
 	(**
 	 * Determine if the log should be rotated.
 	 *
@@ -475,7 +475,7 @@ script RotatingLogger
 	on _should_rotate(msg)
 		return _over_maxbytes(msg)
 	end _should_rotate
-	
+
 	(**
 	 * Rotate the backup logs.
 	 *
@@ -496,7 +496,7 @@ script RotatingLogger
 			set name of disk item logpath to my _filename & "." & "1"
 		end tell
 	end _rotate
-	
+
 	(**
 	 * Determine if the log size is over the max size.
 	 *
@@ -507,7 +507,7 @@ script RotatingLogger
 		if maxbytes = 0 or not _HelperLib's exists_file(my _compile_filepath()) then
 			return false
 		end if
-		
+
 		tell application "System Events"
 			set logsize to size of disk item (my _compile_filepath())
 		end tell
@@ -547,7 +547,7 @@ end get_logger
 on get_logger_at_level(logpath, lvl)
 	-- Make sure level exists
 	get_level_name(lvl)
-	
+
 	set l to get_logger(logpath)
 	set l's level to lvl
 	return l
@@ -580,7 +580,7 @@ end get_rotating_logger
 on get_rotating_logger_at_level(logpath, maxbytes, lvl)
 	-- Make sure level exists
 	get_level_name(lvl)
-	
+
 	set l to get_rotating_logger(logpath, maxbytes)
 	set l's level to lvl
 	return l
